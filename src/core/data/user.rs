@@ -19,7 +19,7 @@ pub struct UserFields {
     pub username: String,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct User {
     authenticated: bool,
     country: CountryCode,
