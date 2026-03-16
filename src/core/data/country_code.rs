@@ -23,7 +23,7 @@ impl fmt::Display for CountryCodeError {
 
 impl error::Error for CountryCodeError {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CountryCode {
     AF,
     AX,
