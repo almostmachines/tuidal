@@ -1620,6 +1620,7 @@ name = "tuidal"
 version = "0.1.0"
 dependencies = [
  "cargo-llvm-cov",
+ "crossterm",
  "ratatui",
 ]
 
