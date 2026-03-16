@@ -3,7 +3,7 @@ use std::error;
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
-enum CountryCodeError {
+pub enum CountryCodeError {
     UnrecognisedCode(String),
 }
 
@@ -24,7 +24,7 @@ impl fmt::Display for CountryCodeError {
 impl error::Error for CountryCodeError {}
 
 #[derive(Debug, PartialEq)]
-enum CountryCode {
+pub enum CountryCode {
     AF,
     AX,
     AL,
