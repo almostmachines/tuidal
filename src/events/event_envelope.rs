@@ -27,7 +27,7 @@ impl<T: Clone> EventEnvelope<T> {
     }
 
     pub fn mark_as_published(&self, published_by: String) -> Result<Self, EventEnvelopeError> {
-        if self.published_by.is_some() {
+        if self.is_published() {
             return Err(EventEnvelopeError::AlreadyPublished);
         }
 
@@ -41,6 +41,10 @@ impl<T: Clone> EventEnvelope<T> {
             created_by: self.created_by.clone(),
             data: self.data.clone(),
         })
+    }
+
+    pub fn is_published(&self) -> bool {
+        self.publication_date.is_some() && self.published_by.is_some()
     }
 
     pub fn data(&self) -> &T {
