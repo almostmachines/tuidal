@@ -273,6 +273,7 @@ pub enum CountryCode {
 }
 
 impl CountryCode {
+    #[allow(dead_code)]
     fn code(&self) -> &str {
         match self {
             CountryCode::AF => "AF",
@@ -527,6 +528,7 @@ impl CountryCode {
         }
     }
 
+    #[allow(dead_code)]
     fn name(&self) -> &str {
         match self {
             CountryCode::AF => "Afghanistan",

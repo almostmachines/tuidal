@@ -33,6 +33,7 @@ pub struct User {
 }
 
 impl User {
+    #[allow(dead_code)]
     fn new(fields: UserFields) -> Result<Self, UserError> {
         let country: CountryCode = match fields.country_code_str.parse() {
             Ok(country) => country,
