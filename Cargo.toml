@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 crossterm = "0.29.0"
 ratatui = "0.30.0"
+rx_event_bus = "0.1.1"
+rxrust = "1.0.0-rc.3"
 
 [dev-dependencies]
 cargo-llvm-cov = "0.8.4"
