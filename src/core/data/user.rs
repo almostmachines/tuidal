@@ -40,11 +40,11 @@ impl User {
         };
 
         if fields.id.is_empty() {
-            return Err(UserError::InvalidId(String::from("")))
+            return Err(UserError::InvalidId(String::from("")));
         }
 
         if fields.username.is_empty() {
-            return Err(UserError::InvalidUsername(fields.username))
+            return Err(UserError::InvalidUsername(fields.username));
         }
 
         Ok(Self {

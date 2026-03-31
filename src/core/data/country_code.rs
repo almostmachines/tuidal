@@ -1,6 +1,6 @@
-use std::str;
 use std::error;
 use std::fmt;
+use std::str;
 
 #[derive(Debug, PartialEq)]
 pub enum CountryCodeError {
@@ -11,12 +11,8 @@ impl fmt::Display for CountryCodeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CountryCodeError::UnrecognisedCode(code) => {
-                write!(
-                    f,
-                    "Unrecognised country code: {}",
-                    code,
-                )
-            },
+                write!(f, "Unrecognised country code: {}", code,)
+            }
         }
     }
 }
