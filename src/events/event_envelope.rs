@@ -26,7 +26,7 @@ impl<T: Clone> EventEnvelope<T> {
         }
     }
 
-    pub fn mark_as_published(&self, published_by: String) -> Result<Self, EventEnvelopeError> {
+    pub fn set_published_by(&self, published_by: String) -> Result<Self, EventEnvelopeError> {
         if self.is_published() {
             return Err(EventEnvelopeError::AlreadyPublished);
         }
@@ -36,8 +36,25 @@ impl<T: Clone> EventEnvelope<T> {
         }
 
         Ok(Self {
-            publication_date: Some(Utc::now()),
+            publication_date: None,
             published_by: Some(published_by),
+            created_by: self.created_by.clone(),
+            data: self.data.clone(),
+        })
+    }
+
+    pub fn mark_as_published(&self) -> Result<Self, EventEnvelopeError> {
+        if self.is_published() {
+            return Err(EventEnvelopeError::AlreadyPublished);
+        }
+
+        if self.published_by.is_none() {
+            return Err(EventEnvelopeError::EmptyPublishedBy);
+        }
+
+        Ok(Self {
+            publication_date: Some(Utc::now()),
+            published_by: self.published_by.clone(),
             created_by: self.created_by.clone(),
             data: self.data.clone(),
         })
@@ -90,17 +107,28 @@ mod tests {
     }
 
     #[test]
-    fn test_event_envelope_has_no_published_by_when_unpublished() {
-        let evt = EventEnvelope::new(String::from("creator"), 21);
-
-        assert!(evt.unwrap().published_by().is_none());
-    }
-
-    #[test]
-    fn test_event_envelope_has_no_publication_date_when_unpublished() {
+    fn test_event_envelope_has_no_publication_date_on_instantiation() {
         let evt = EventEnvelope::new(String::from("creator"), 21);
 
         assert!(evt.unwrap().publication_date().is_none());
+    }
+
+    #[test]
+    fn test_event_envelope_can_set_published_by() {
+        let published_by = String::from("publisher");
+        let evt = EventEnvelope::new(String::from("creator"), 21);
+        let maybe_evt = evt.unwrap().set_published_by(published_by.clone());
+
+        assert_eq!(maybe_evt.unwrap().published_by, Some(published_by));
+    }
+
+    #[test]
+    fn test_event_envelope_cannot_set_empty_published_by() {
+        let published_by = String::from("");
+        let evt = EventEnvelope::new(String::from("creator"), 21);
+        let maybe_evt = evt.unwrap().set_published_by(published_by.clone());
+
+        assert!(matches!(maybe_evt, Err(EventEnvelopeError::EmptyPublishedBy)));
     }
 
     #[test]
@@ -122,46 +150,56 @@ mod tests {
     #[test]
     fn test_event_envelope_can_mark_as_published() {
         let evt = EventEnvelope::new(String::from("creator"), 21);
-        let evt = evt.unwrap().mark_as_published(String::from("publisher"));
+        let evt = evt.unwrap().set_published_by(String::from("publisher"));
+        let evt = evt.unwrap().mark_as_published();
 
         assert!(evt.unwrap().is_published());
     }
 
     #[test]
-    fn test_event_envelope_can_mark_as_published_repeatedly() {
+    fn test_event_envelope_cannot_mark_as_published_repeatedly() {
         let evt = EventEnvelope::new(String::from("creator"), 21);
-        let evt = evt.unwrap().mark_as_published(String::from("publisher"));
-        let evt = evt.unwrap().mark_as_published(String::from("publisher"));
+        let evt = evt.unwrap().set_published_by(String::from("publisher"));
+        let evt = evt.unwrap().mark_as_published();
+        let evt = evt.unwrap().mark_as_published();
 
         assert!(matches!(evt, Err(EventEnvelopeError::AlreadyPublished)));
     }
 
     #[test]
-    fn test_event_envelope_published_by_cannot_be_empty() {
+    fn test_event_envelope_cannot_change_published_by_after_publication() {
         let evt = EventEnvelope::new(String::from("creator"), 21);
-        let evt = evt.unwrap().mark_as_published(String::from(""));
+        let evt = evt.unwrap().set_published_by(String::from("publisher 1"));
+        let evt = evt.unwrap().mark_as_published();
+        let evt = evt.unwrap().set_published_by(String::from("publisher 2"));
+
+        assert!(matches!(evt, Err(EventEnvelopeError::AlreadyPublished)));
+    }
+
+    #[test]
+    fn test_event_envelope_cannot_publish_without_published_by() {
+        let evt = EventEnvelope::new(String::from("creator"), 21);
+        let evt = evt.unwrap().mark_as_published();
 
         assert!(matches!(evt, Err(EventEnvelopeError::EmptyPublishedBy)));
     }
 
     #[test]
-    fn test_event_envelope_has_published_by_when_published() {
+    fn test_event_envelope_has_correct_fields_after_publication() {
+        let creator = String::from("creator");
         let publisher = String::from("publisher");
-        let evt = EventEnvelope::new(String::from("creator"), 21);
-        let evt = evt.unwrap().mark_as_published(publisher.clone());
-
-        assert_eq!(evt.unwrap().published_by(), &Some(publisher));
-    }
-
-    #[test]
-    fn test_event_envelope_has_publication_date_when_published() {
-        let publisher = String::from("publisher");
-        let evt = EventEnvelope::new(String::from("creator"), 21);
+        let data = 21;
+        let evt = EventEnvelope::new(creator.clone(), data);
+        let evt = evt.unwrap().set_published_by(publisher.clone());
         let before = Utc::now();
-        let evt = evt.unwrap().mark_as_published(publisher.clone());
+        let evt = evt.unwrap().mark_as_published();
         let after = Utc::now();
-        let pub_date = evt.unwrap().publication_date().unwrap();
+        let published_event = evt.unwrap();
+        let pub_date = published_event.publication_date().unwrap();
 
         assert!(pub_date >= before && pub_date <= after);
+        assert_eq!(published_event.created_by(), &creator);
+        assert_eq!(published_event.published_by(), &Some(publisher));
+        assert_eq!(published_event.data(), &data);
     }
 }
