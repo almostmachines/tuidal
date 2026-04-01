@@ -128,7 +128,10 @@ mod tests {
         let evt = EventEnvelope::new(String::from("creator"), 21);
         let maybe_evt = evt.unwrap().set_published_by(published_by.clone());
 
-        assert!(matches!(maybe_evt, Err(EventEnvelopeError::EmptyPublishedBy)));
+        assert!(matches!(
+            maybe_evt,
+            Err(EventEnvelopeError::EmptyPublishedBy)
+        ));
     }
 
     #[test]
